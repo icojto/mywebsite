@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Game-focused portfolio of Hristo Aleksiev featuring game development, game design, level design, systems design, and project coordination work." />
+  <link rel="icon" href="assets/images/ui/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/ui/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <link rel="stylesheet" href="css/projects.css" />
+  <title>Hristo Aleksiev — Projects Archive</title>
+</head>
+<body class="page-projects">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="index.html" aria-label="Hristo Aleksiev home page" data-home-link>
+      <span class="brand__name">Hristo Aleksiev</span>
+      <span class="brand__role">Game Developer · Game Designer · Project Coordination</span>
+    </a>
+
+    <button class="btn icon-btn nav-toggle" type="button" data-nav-toggle aria-label="Open navigation">☰</button>
+
+    <nav class="site-nav" data-site-nav>
+      <div class="site-nav__links">
+        <a href="index.html" data-home-link>Home</a>
+        <a href="index.html#portfolio" data-section-link="portfolio">Highlighted</a>
+        <a href="index.html#summary" data-section-link="summary">Summary</a>
+        <a href="#footer" data-section-link="footer">Contact</a>
+        <a href="projects.html">Projects</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+
+  <main id="main" class="page-shell">
+    <section class="section archive-hero">
+      <div class="container">
+        <div class="archive-banner card">
+          <span class="eyebrow">Full projects archive</span>
+          <h1 class="section-title">Newest first, reusable cards, one shared modal</h1>
+          <p class="archive-banner__meta">This page is the complete archive view. It keeps grouped filters, search by project name, and reusable project detail popups while sorting the archive by newest first by default.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="archive">
+      <div class="container">
+        <div class="filters-layout">
+          <aside class="filters-panel card" data-filters-panel></aside>
+
+          <div class="projects-shell">
+            <div class="toolbar card">
+              <div>
+                <button class="btn btn-soft mobile-filter-toggle" type="button" data-mobile-filter-toggle>Open filters</button>
+                <div class="muted" data-results-count></div>
+              </div>
+              <div class="toolbar-actions">
+                <label class="search-wrap" aria-label="Search projects by name">
+                  <span>⌕</span>
+                  <input type="search" placeholder="Search project name or keyword" data-project-search />
+                </label>
+                <select class="btn btn-soft" data-project-sort aria-label="Sort projects">
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="title">Title A–Z</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="project-grid" data-project-grid></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+<footer class="site-footer" id="footer">
+  <div class="container">
+    <div class="footer-card card">
+      <div class="footer-main">
+        <div>
+          <div class="brand__name">Hristo Aleksiev</div>
+          <p class="footer-copy">Game Developer | Game Designer | Project Coordination</p>
+        </div>
+        <div class="footer-meta">
+          <a class="contact-chip" href="mailto:hristo.aleksiev.01@gmail.com">✉ hristo.aleksiev.01@gmail.com</a>
+          <a class="contact-chip" href="https://www.linkedin.com/in/hristo-aleksiev-60959892/" target="_blank" rel="noreferrer">LinkedIn</a>
+        </div>
+      </div>
+      <div class="footer-links" style="margin-top:1rem;">
+        <a class="footer-link" href="https://mlgjman.itch.io/" target="_blank" rel="noreferrer">Itch.io</a>
+        <a class="footer-link" href="https://sketchfab.com/hristo_aleksiev/" target="_blank" rel="noreferrer">Sketchfab</a>
+        <a class="footer-link" href="projects.html">Portfolio Page</a>
+        <div class="cv-menu" data-cv-menu>
+          <button class="footer-link footer-link--button" type="button" data-cv-toggle aria-expanded="false">Download CV</button>
+          <div class="cv-menu__panel" data-cv-panel hidden>
+            <button class="cv-menu__link" type="button" data-cv-choice data-cv-title="CV Level Designer" data-cv-file="assets/files/Hristo_Aleksiev_CV_Level_Designer.pdf">CV Level Designer</button>
+            <button class="cv-menu__link" type="button" data-cv-choice data-cv-title="CV Project Manager" data-cv-file="assets/files/Hristo_Aleksiev_CV_Project_Manager.pdf">CV Project Manager</button>
+          </div>
+        </div>
+      </div>
+      <p class="footer-copy" style="margin:1rem 0 0;">© <span data-current-year></span> Hristo Aleksiev. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+
+<!-- Shared project modal used by both homepage cards and archive cards -->
+<div class="modal" data-project-modal aria-hidden="true">
+  <div class="modal__dialog card" data-modal-dialog role="dialog" aria-modal="true" aria-label="Project details"></div>
+</div>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.archive-hero {
+  padding-top: .5rem;
+}
+.archive-banner {
+  padding: 1.35rem;
+  display: grid; gap: .6rem;
+}
+.archive-banner__meta { color: var(--text-soft); max-width: 70ch; }
