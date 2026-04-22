@@ -1338,6 +1338,25 @@
     return previewMap[source] || source;
   }
 
+  function getHeroImagePositions(slide) {
+    const positions = {
+      profile: { desktop: "78% center", mobile: "72% center" },
+      "current-endless-runner": { desktop: "54% center", mobile: "58% center" },
+      obituary: { desktop: "50% center", mobile: "48% center" },
+      "half-life-2-city": { desktop: "50% center", mobile: "50% center" },
+      "first-person-wireframe": { desktop: "50% center", mobile: "44% center" },
+      "game-developer-quiz": { desktop: "50% center", mobile: "48% center" },
+      "metahuman-airport-navigator": { desktop: "68% center", mobile: "64% center" },
+      "abysmal-depths": { desktop: "52% center", mobile: "50% center" }
+    };
+
+    if (slide.kind === "profile") {
+      return positions.profile;
+    }
+
+    return positions[slide.projectId] || { desktop: "center center", mobile: "center center" };
+  }
+
   /* ==============================
      4) SITE SHELL
      ============================== */
@@ -1585,6 +1604,7 @@
     const slides = [
       {
         kind: "profile",
+        projectId: "profile",
         title: profile.name,
         copy: "Game Developer · Game Designer · Project Coordination.",
         image: profile.heroImage,
@@ -1594,6 +1614,7 @@
     ].concat(
       highlighted.map(project => ({
         kind: "project",
+        projectId: project.id,
         title: project.title,
         copy: project.shortSummary,
         image: safeImage(project.media[0]),
@@ -1609,6 +1630,7 @@
       <div class="hero-slider__stage">
         ${slides
           .map(function (slide, index) {
+            const positions = getHeroImagePositions(slide);
             const contentHtml = `
               <div class="hero-slide__content ${slide.kind === "profile" ? "hero-slide__content--profile" : "hero-slide__content--project"}">
                 <div class="hero-slide__meta">
@@ -1626,7 +1648,7 @@
             `;
 
             return `
-              <article class="hero-slide ${index === 0 ? "is-active" : ""}" data-hero-slide>
+              <article class="hero-slide ${index === 0 ? "is-active" : ""}" data-hero-slide style="--hero-desktop-position:${escapeHtml(positions.desktop)}; --hero-mobile-position:${escapeHtml(positions.mobile)};">
                 <div class="hero-slide__media">
                   <img src="${escapeHtml(index === 0 ? slide.image : previewImage(slide.image))}" alt="${escapeHtml(slide.alt)}" ${index === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'} decoding="async" />
                 </div>
@@ -1682,6 +1704,40 @@
         setActiveSlide(Number(dotEl.getAttribute("data-hero-dot")) || 0);
         startAutoPlay();
       });
+    });
+
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let dragActive = false;
+
+    function onPointerDown(event) {
+      if (event.pointerType === "mouse" && event.button !== 0) {
+        return;
+      }
+      dragActive = true;
+      pointerStartX = event.clientX;
+      pointerStartY = event.clientY;
+      stopAutoPlay();
+    }
+
+    function onPointerUp(event) {
+      if (!dragActive) {
+        return;
+      }
+      dragActive = false;
+      const deltaX = event.clientX - pointerStartX;
+      const deltaY = event.clientY - pointerStartY;
+      if (Math.abs(deltaX) > 42 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        setActiveSlide(currentIndex + (deltaX < 0 ? 1 : -1));
+      }
+      startAutoPlay();
+    }
+
+    root.addEventListener("pointerdown", onPointerDown);
+    root.addEventListener("pointerup", onPointerUp);
+    root.addEventListener("pointercancel", function () {
+      dragActive = false;
+      startAutoPlay();
     });
 
     setActiveSlide(0);
@@ -1818,7 +1874,7 @@
           <div class="modal__thumb-shell">
             <button class="btn icon-btn modal__thumb-nav" type="button" data-thumb-prev aria-label="Scroll previous media">←</button>
             <div class="modal__thumbs-viewport" data-thumb-viewport>
-              <div class="modal__thumbs ${media.length > 4 ? "modal__thumbs--desktop-grid" : "modal__thumbs--single-row"}" data-modal-thumbs style="--thumb-columns:${Math.max(3, Math.ceil(media.length / 2))};">
+              <div class="modal__thumbs ${media.length > 4 ? "modal__thumbs--desktop-grid" : "modal__thumbs--single-row"}" data-modal-thumbs style="--thumb-columns:${Math.max(3, Math.ceil(media.length / 2))}; --thumb-rows:${Math.min(4, Math.max(2, Math.ceil(media.length / 3)))};">
                 ${media
                   .map(function (src, mediaIndex) {
                     return `
@@ -2288,7 +2344,7 @@
     const filtersEl = $("[data-filters-panel]");
     const countEl = $("[data-results-count]");
     const searchInput = $("[data-project-search]");
-    const mobileFilterToggle = $("[data-mobile-filter-toggle]");
+    const mobileFilterToggles = $all("[data-mobile-filter-toggle]");
 
     if (!gridEl || !filtersEl || !countEl) {
       return;
@@ -2327,11 +2383,17 @@
       });
     }
 
-    if (mobileFilterToggle) {
+    mobileFilterToggles.forEach(function (mobileFilterToggle) {
+      mobileFilterToggle.setAttribute("aria-expanded", filtersEl.classList.contains("is-open") ? "true" : "false");
       mobileFilterToggle.addEventListener("click", function () {
-        filtersEl.classList.toggle("is-open");
+        const willOpen = !filtersEl.classList.contains("is-open");
+        filtersEl.classList.toggle("is-open", willOpen);
+        mobileFilterToggle.setAttribute("aria-expanded", String(willOpen));
+        if (willOpen) {
+          filtersEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
-    }
+    });
   }
 
   /* ==============================
@@ -2344,7 +2406,7 @@
     const countEl = $("[data-results-count]");
     const searchInput = $("[data-project-search]");
     const sortSelect = $("[data-project-sort]");
-    const mobileFilterToggle = $("[data-mobile-filter-toggle]");
+    const mobileFilterToggles = $all("[data-mobile-filter-toggle]");
 
     if (!gridEl || !filtersEl || !countEl || !sortSelect) {
       return;
@@ -2389,11 +2451,17 @@
       render();
     });
 
-    if (mobileFilterToggle) {
+    mobileFilterToggles.forEach(function (mobileFilterToggle) {
+      mobileFilterToggle.setAttribute("aria-expanded", filtersEl.classList.contains("is-open") ? "true" : "false");
       mobileFilterToggle.addEventListener("click", function () {
-        filtersEl.classList.toggle("is-open");
+        const willOpen = !filtersEl.classList.contains("is-open");
+        filtersEl.classList.toggle("is-open", willOpen);
+        mobileFilterToggle.setAttribute("aria-expanded", String(willOpen));
+        if (willOpen) {
+          filtersEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
-    }
+    });
   }
 
   /* ==============================

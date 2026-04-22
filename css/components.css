@@ -83,7 +83,7 @@
   height: 100%;
 }
 
-.hero-slide__media img { object-fit: cover; }
+.hero-slide__media img { object-fit: cover; object-position: var(--hero-desktop-position, center center); }
 
 .hero-slide__overlay {
   position: absolute;
@@ -112,15 +112,15 @@
 }
 
 .hero-slide__title { margin: 0; font-size: clamp(1.1rem, 1.7vw, 1.6rem); }
-.hero-slide__copy { margin: 0; color: var(--text-soft); max-width: 32ch; }
+.hero-slide__copy { margin: 0; color: var(--text-soft); max-width: 32ch; line-height: 1.55; }
 .hero-slide__meta { display: flex; gap: .45rem; flex-wrap: wrap; }
 .hero-slider__dots {
   position: absolute;
   left: 1.2rem;
-  bottom: 1.2rem;
+  bottom: 1rem;
   display: flex;
   gap: .55rem;
-  z-index: 3;
+  z-index: 4;
 }
 
 .hero-slider__dot {
@@ -373,6 +373,21 @@
 
 .search-wrap input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); }
 .toolbar-actions { display: flex; gap: .7rem; flex-wrap: wrap; }
+[data-project-sort] {
+  min-width: 172px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(180deg, rgba(20,29,56,.95), rgba(14,21,40,.98));
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+}
+
+[data-project-sort] option {
+  color: #0d1224;
+  background: #f4f7ff;
+}
+
 
 .project-grid {
   display: grid;
@@ -472,6 +487,9 @@
   height: clamp(250px, 40vh, 430px);
   min-height: 250px;
   background: rgba(255,255,255,.02);
+  display: grid;
+  place-items: center;
+  padding: .25rem;
 }
 .modal__featured img,
 .modal__featured video {
@@ -566,7 +584,7 @@
   position: relative;
   min-height: 0;
 }
-.modal__close { position: sticky; top: 0; margin-left: auto; right: auto; z-index: 2; }
+.modal__close { position: sticky; top: .2rem; margin-left: auto; right: auto; z-index: 3; width: 48px; height: 48px; color: #f6f8ff; background: rgba(10,15,30,.86); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 10px 22px rgba(0,0,0,.24); }
 .modal__head { padding-right: 0; }
 .modal__title { margin: .4rem 0 .6rem; font-size: clamp(1.9rem, 3vw, 2.6rem); letter-spacing: -.03em; }
 .modal__summary { color: var(--text-soft); line-height: 1.75; }
