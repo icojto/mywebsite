@@ -2173,6 +2173,7 @@
       <div class="filter-chips filter-chips--top">
         <button class="btn btn-soft filter-action-btn" type="button" data-filter-clear>Clear filters</button>
         <button class="btn btn-soft filter-action-btn" type="button" data-filter-highlighted>Only highlighted</button>
+        <button class="btn btn-soft filter-action-btn" type="button" data-filter-toggle-all aria-expanded="false">Expand all filters</button>
       </div>
       ${filterGroups
         .map(function (group, index) {
@@ -2207,6 +2208,23 @@
         .join("")}
     `;
 
+    const toggleAllButton = $("[data-filter-toggle-all]", container);
+
+    function updateToggleAllButton() {
+      if (!toggleAllButton) {
+        return;
+      }
+
+      const allGroupsOpen = filterGroups.every(function (group) {
+        return !!state.openGroups[group.id];
+      });
+
+      toggleAllButton.textContent = allGroupsOpen ? "Collapse all filters" : "Expand all filters";
+      toggleAllButton.setAttribute("aria-expanded", String(allGroupsOpen));
+    }
+
+    updateToggleAllButton();
+
     $all("[data-group-toggle]", container).forEach(function (button) {
       button.addEventListener("click", function () {
         const group = button.closest(".filter-group");
@@ -2224,8 +2242,37 @@
           state.openGroups[groupId] = willExpand;
           persistState(storageKey, state);
         }
+
+        updateToggleAllButton();
       });
     });
+
+    if (toggleAllButton) {
+      toggleAllButton.addEventListener("click", function () {
+        const allGroupsOpen = filterGroups.every(function (group) {
+          return !!state.openGroups[group.id];
+        });
+        const shouldOpenAll = !allGroupsOpen;
+
+        filterGroups.forEach(function (group) {
+          state.openGroups[group.id] = shouldOpenAll;
+
+          const groupEl = $(`[data-group="${group.id}"]`, container);
+          const groupButton = $(`[data-group-toggle="${group.id}"]`, container);
+
+          if (groupEl) {
+            groupEl.classList.toggle("is-collapsed", !shouldOpenAll);
+          }
+
+          if (groupButton) {
+            groupButton.setAttribute("aria-expanded", String(shouldOpenAll));
+          }
+        });
+
+        persistState(storageKey, state);
+        updateToggleAllButton();
+      });
+    }
 
     $all("input[data-filter-group]", container).forEach(function (input) {
       input.addEventListener("change", function () {
@@ -2383,16 +2430,11 @@
       });
     }
 
+    // v1.1: mobile filter open/close is handled once in js/overrides.js.
+    // Keeping another click listener here caused the button to open, scroll,
+    // then immediately close again at tablet/mobile widths.
     mobileFilterToggles.forEach(function (mobileFilterToggle) {
       mobileFilterToggle.setAttribute("aria-expanded", filtersEl.classList.contains("is-open") ? "true" : "false");
-      mobileFilterToggle.addEventListener("click", function () {
-        const willOpen = !filtersEl.classList.contains("is-open");
-        filtersEl.classList.toggle("is-open", willOpen);
-        mobileFilterToggle.setAttribute("aria-expanded", String(willOpen));
-        if (willOpen) {
-          filtersEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
     });
   }
 
@@ -2451,16 +2493,11 @@
       render();
     });
 
+    // v1.1: mobile filter open/close is handled once in js/overrides.js.
+    // Keeping another click listener here caused the button to open, scroll,
+    // then immediately close again at tablet/mobile widths.
     mobileFilterToggles.forEach(function (mobileFilterToggle) {
       mobileFilterToggle.setAttribute("aria-expanded", filtersEl.classList.contains("is-open") ? "true" : "false");
-      mobileFilterToggle.addEventListener("click", function () {
-        const willOpen = !filtersEl.classList.contains("is-open");
-        filtersEl.classList.toggle("is-open", willOpen);
-        mobileFilterToggle.setAttribute("aria-expanded", String(willOpen));
-        if (willOpen) {
-          filtersEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
     });
   }
 

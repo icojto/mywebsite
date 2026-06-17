@@ -1,0 +1,16 @@
+Portfolio website v1.1 patch
+
+Fixes:
+- Bug 1: Open filters no longer only scrolls / instantly closes on tablet-mobile widths.
+- Bug 4: Close filters now closes the mobile/tablet filter panel. The close button is hidden on desktop/sidebar layout.
+
+Files changed:
+- js/app.js
+- js/overrides.js
+- css/overrides.css
+
+QA:
+- Test homepage at <=980px: Open filters opens panel and button text changes to Close filters.
+- Test homepage at <=980px: Close filters inside panel closes panel.
+- Test projects/archive page at <=980px with same steps.
+- Test >980px: sidebar filters remain visible; mobile-only close button should not show.

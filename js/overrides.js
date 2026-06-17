@@ -15,7 +15,7 @@
       portfolioCopy: 'Browse featured projects first, then open filters to narrow by discipline, tools, team type, and playability. Search also works by project name or keyword.',
       summaryEyebrow: 'Professional summary', summaryTitle: 'A cleaner recruiter-friendly overview',
       archiveEyebrow: 'Full projects archive', archiveTitle: 'Newest first, reusable cards, one shared modal', archiveCopy: 'This page is the complete archive view. Use grouped filters, search, and one shared project popup while keeping the archive sorted by newest first.',
-      openFilters: 'Open filters', closeFilters: 'Close filters', clearFilters: 'Clear filters', onlyHighlighted: 'Only highlighted', searchPlaceholder: 'Search project name or keyword', seeFullArchive: 'See full archive',
+      openFilters: 'Open filters', closeFilters: 'Close filters', clearFilters: 'Clear filters', onlyHighlighted: 'Only highlighted', expandAllFilters: 'Expand all filters', collapseAllFilters: 'Collapse all filters', searchPlaceholder: 'Search project name or keyword', seeFullArchive: 'See full archive',
       newestFirst: 'Newest first', oldestFirst: 'Oldest first', titleAZ: 'Title A–Z',
       details: 'Details', link: 'Link', itch: 'itch.io',
       modalDiscipline: 'Discipline', modalPlayability: 'Playability', modalGenre: 'Genre / Style', modalTools: 'Tools / Engines', modalFlags: 'Special Flags', modalResponsibilities: 'Responsibilities / Contributions', modalNotes: 'Notes',
@@ -36,7 +36,7 @@
       portfolioCopy: 'Разгледай първо подбраните проекти, после отвори филтрите, за да стесниш по дисциплина, инструменти, тип екип и състояние. Търсенето работи и по име на проект или ключова дума.',
       summaryEyebrow: 'Професионално обобщение', summaryTitle: 'По-чист recruiter-friendly преглед',
       archiveEyebrow: 'Пълен архив с проекти', archiveTitle: 'Най-новите първо, преизползваеми карти и един общ popup', archiveCopy: 'Тази страница е пълният архив. Използвай групирани филтри, търсене и общ popup за проектите, докато архивът остава сортиран по най-новите първо.',
-      openFilters: 'Отвори филтри', closeFilters: 'Затвори филтри', clearFilters: 'Изчисти филтрите', onlyHighlighted: 'Само подбрани', searchPlaceholder: 'Търси по име на проект или ключова дума', seeFullArchive: 'Виж пълния архив',
+      openFilters: 'Отвори филтри', closeFilters: 'Затвори филтри', clearFilters: 'Изчисти филтрите', onlyHighlighted: 'Само подбрани', expandAllFilters: 'Отвори всички филтри', collapseAllFilters: 'Затвори всички филтри', searchPlaceholder: 'Търси по име на проект или ключова дума', seeFullArchive: 'Виж пълния архив',
       newestFirst: 'Най-новите първо', oldestFirst: 'Най-старите първо', titleAZ: 'Заглавие А–Я',
       details: 'Детайли', link: 'Линк', itch: 'itch.io',
       modalDiscipline: 'Дисциплина', modalPlayability: 'Състояние', modalGenre: 'Жанр / стил', modalTools: 'Инструменти / енджини', modalFlags: 'Специални флагове', modalResponsibilities: 'Отговорности / принос', modalNotes: 'Бележки',
@@ -135,6 +135,10 @@
     });
     document.querySelectorAll('[data-filter-clear]').forEach(btn=>btn.textContent=currentPack().clearFilters);
     document.querySelectorAll('[data-filter-highlighted]').forEach(btn=>btn.textContent=currentPack().onlyHighlighted);
+    document.querySelectorAll('[data-filter-toggle-all]').forEach(btn=>{
+      const allOpen = btn.getAttribute('aria-expanded') === 'true';
+      btn.textContent = allOpen ? currentPack().collapseAllFilters : currentPack().expandAllFilters;
+    });
   }
 
   function translateProjectCards(){
@@ -234,18 +238,59 @@
     document.querySelectorAll('.filters-layout').forEach(layout=>{
       const panel=layout.querySelector('.filters-panel'); const shell=layout.querySelector('.projects-shell'); const toolbar=shell?.querySelector('.toolbar'); const btn=layout.querySelector('[data-mobile-filter-toggle]');
       if(!panel || !shell || !toolbar || !btn) return;
+
+      if(!panel.id) panel.id='filters-panel-' + Math.random().toString(36).slice(2,8);
+      btn.setAttribute('aria-controls', panel.id);
+
+      const setFilterState=(isOpen)=>{
+        panel.classList.toggle('is-open', isOpen);
+        btn.classList.toggle('is-close', isOpen);
+        btn.setAttribute('aria-expanded', String(isOpen));
+        btn.textContent = isOpen ? currentPack().closeFilters : currentPack().openFilters;
+      };
+
       if(!panel.__placeholder){ panel.__placeholder=document.createComment('filters-placeholder'); layout.insertBefore(panel.__placeholder, panel); }
       const sync=()=>{
-        if(window.innerWidth<=980){ if(panel.parentElement!==shell) shell.insertBefore(panel, toolbar.nextSibling); }
-        else if(panel.parentElement!==layout){ layout.insertBefore(panel, panel.__placeholder.nextSibling); panel.classList.remove('is-open'); btn.classList.remove('is-close'); btn.textContent=currentPack().openFilters; }
+        if(window.innerWidth<=980){
+          if(panel.parentElement!==shell) shell.insertBefore(panel, toolbar.nextSibling);
+          setFilterState(panel.classList.contains('is-open'));
+        } else {
+          if(panel.parentElement!==layout) layout.insertBefore(panel, panel.__placeholder.nextSibling);
+          setFilterState(false);
+        }
       };
+
       sync();
       if(!layout.__filterResizeBound){ window.addEventListener('resize', sync); layout.__filterResizeBound=true; }
-      if(!btn.__mobileBound){ btn.addEventListener('click', ()=>{ sync(); const willOpen=!panel.classList.contains('is-open'); panel.classList.toggle('is-open', willOpen); btn.classList.toggle('is-close', willOpen); btn.textContent=willOpen ? currentPack().closeFilters : currentPack().openFilters; }); btn.__mobileBound=true; }
-      let closeBtn=panel.querySelector('[data-filter-close-override]'); if(!closeBtn){ const chips=panel.querySelector('.filter-chips'); if(chips){ closeBtn=document.createElement('button'); closeBtn.type='button'; closeBtn.className='btn btn-soft filter-action-btn filter-action-btn--close'; closeBtn.setAttribute('data-filter-close-override',''); closeBtn.addEventListener('click', ()=>{ panel.classList.remove('is-open'); btn.classList.remove('is-close'); btn.textContent=currentPack().openFilters; }); chips.appendChild(closeBtn); } }
+      if(!btn.__mobileBound){
+        btn.addEventListener('click', (event)=>{
+          event.preventDefault();
+          sync();
+          setFilterState(!panel.classList.contains('is-open'));
+        });
+        btn.__mobileBound=true;
+      }
+
+      let closeBtn=panel.querySelector('[data-filter-close-override]');
+      if(!closeBtn){
+        const chips=panel.querySelector('.filter-chips');
+        if(chips){
+          closeBtn=document.createElement('button');
+          closeBtn.type='button';
+          closeBtn.className='btn btn-soft filter-action-btn filter-action-btn--close';
+          closeBtn.setAttribute('data-filter-close-override','');
+          closeBtn.addEventListener('click', ()=>{ setFilterState(false); });
+          chips.appendChild(closeBtn);
+        }
+      }
       if(closeBtn) closeBtn.textContent=currentPack().closeFilters;
       const clear=panel.querySelector('[data-filter-clear]'); if(clear) clear.textContent=currentPack().clearFilters;
       const only=panel.querySelector('[data-filter-highlighted]'); if(only) only.textContent=currentPack().onlyHighlighted;
+      const toggleAll=panel.querySelector('[data-filter-toggle-all]');
+      if(toggleAll){
+        const allOpen = toggleAll.getAttribute('aria-expanded') === 'true';
+        toggleAll.textContent = allOpen ? currentPack().collapseAllFilters : currentPack().expandAllFilters;
+      }
     });
   }
 
